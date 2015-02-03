@@ -30,6 +30,8 @@ object warmup {
   
   def dup(e: Expr):Expr = e match {
     case Plus(e1,e2)   => Plus(dup(e1), dup(e2)) 
+    case Times(Num(2), e2) => Plus(dup(dup(e2)), dup(e2))
+    case Times(e1, Num(2)) => Plus(dup(e1), dup(e1))
     case Times(e1, e2) => Times(dup(e1), dup(e2))
     case Num(value)    => Num(value)
   }
@@ -37,7 +39,7 @@ object warmup {
   // One simple test case:
   // (* 2 (+ 1 (* 3 2))) should duplicate to (+ (+ 1 (+ 3 3)) (+ 1 (+ 3 3)))
   def main(argv: Array[String]) {
-    val e : Expr = Times(Num(2), Plus(Num(1),Times(Num(3),Num(2))))
+    val e : Expr = Times(Num(2), Plus(Num(1),Times(Num(5),Num(2))))
     println(s"dup(${str(e)}) -> ${str(dup(e))} => ${eval(copy(e))}")
   }
 }
