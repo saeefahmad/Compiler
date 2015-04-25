@@ -37,7 +37,10 @@ object CoreCompiler {
         inputSource = readInputFile(sourceName)
         
         Parser.parse(inputSource)
-        Parser.makeParseTree(inputSource, parseTreeName)
+        Parser.makeParseTree(inputSource, parseTreeName) 
+        var ast = AST.makeAST(inputSource, astName)
+        var blocks = BuildAddressCode.makeCFG(ast, ilocCFGName)
+        BuildMipsCode.makeMIPS(blocks, mipsAsmName)
 
       } catch {
         case e: SyntaxError => {
