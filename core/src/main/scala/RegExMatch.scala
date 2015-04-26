@@ -27,6 +27,7 @@ object RegExMatch {
     case rightParenthPattern() => return "RP"
     case semicolonPattern() => return "SC"
     
+    case "function" => return "function"
     case "if" => return "IF"
     case "then" => return "THEN"
     case "else" => return "ELSE"
@@ -39,6 +40,7 @@ object RegExMatch {
     case "as" => return "AS"    
     case "int" => return "INT"
     case "bool" => return "BOOL"
+    case "procedure" => return "PROCEDURE"
     case "writeInt" => return "WRITEINT"
     case "readInt" => return "READINT"
     case "$" => return "$"

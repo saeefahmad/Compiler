@@ -38,9 +38,9 @@ object CoreCompiler {
         
         Parser.parse(inputSource)
         Parser.makeParseTree(inputSource, parseTreeName) 
-        var ast = AST.makeAST(inputSource, astName)
-        var blocks = BuildAddressCode.makeCFG(ast, ilocCFGName)
-        BuildMipsCode.makeMIPS(blocks, mipsAsmName)
+//        var ast = AST.makeAST(inputSource, astName)
+//        var blocks = BuildAddressCode.makeCFG(ast, ilocCFGName)
+//        BuildMipsCode.makeMIPS(blocks, mipsAsmName)
 
       } catch {
         case e: SyntaxError => {

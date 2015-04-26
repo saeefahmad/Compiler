@@ -23,6 +23,7 @@ object ParseTree {
   val sc = "SC"
   val int = "INT"  
   val bool = "BOOL"
+  val procedure = "PROCEDURE"
   val asgn = "ASGN"
   val readint = "READINT"
   val ifterm = "IF"
@@ -35,6 +36,7 @@ object ParseTree {
   val add = "ADDITIVE"
   val boollit = "boollit"
   val then = "THEN"
+  val function = "function"
   
   
   def parseTree (inputStack: Stack[String], fileName: String, inputStackRaw: Stack[String]): Unit = {
@@ -108,6 +110,9 @@ object ParseTree {
       case `bool` => {
         boolterminal(index)
       }
+      case `procedure` => {
+        procedureterminal(index)
+      }
       case default => throw SyntaxError("Parse Error !!!")  
     }
   } 
@@ -143,6 +148,11 @@ object ParseTree {
         scterminal(index)
         statementSequence(index)        
       }
+      case `function` => {
+        statement(index)
+        scterminal(index)
+        statementSequence(index)        
+      }
       case default => throw SyntaxError("Parse Error !!!")  
     }
   } 
@@ -170,6 +180,9 @@ object ParseTree {
       case `writeint` => {
         writeInt(index)
       } 
+      case `function` => {
+        procedure(index)
+      }
       case default => throw SyntaxError("Parse Error !!!")  
     }
   } 
@@ -462,6 +475,28 @@ object ParseTree {
     }
   }
   
+  // Production 19
+  def procedure (parentIndex: Int): Unit = {
+    var productExpr = Array("function", "ident", "LP", "<expression>", "RP", "<statementSequence>", "END")
+    nIndex = nIndex + 1
+    var index = nIndex
+    tree = addNodeInParseTree(tree, "<procedure>", index)
+    tree = relNodeInParseTree(tree, index, parentIndex)
+    inputStringStack.head match {
+      case `function` => {
+        functionterminal(index)
+        identterminal(index)
+        lpterminal(index)
+        expression(index)
+        rpterminal(index)
+        statementSequence(index)
+        endterminal(index)
+      }
+      case default => throw SyntaxError("Parse Error !!!")  
+    }
+  }
+  
+  
   // terminals    
   def programterminal (parentIndex: Int) {
     inputStringStack.head match {
@@ -620,6 +655,19 @@ object ParseTree {
     }
   }
   
+  def procedureterminal(parentIndex: Int) = {
+    inputStringStack.head match {
+      case `procedure` => {
+        nIndex = nIndex + 1
+        tree = addNodeInParseTree(tree, procedure, nIndex)
+        tree = relNodeInParseTree(tree, nIndex, parentIndex)
+        inputStringStack.pop()
+        inputStringRawStack.pop()
+      }
+      case default => throw SyntaxError("Parse Error !!!")  
+    }
+  }
+  
   def asgnterminal(parentIndex: Int) = {
     inputStringStack.head match {
       case `asgn` => {
@@ -768,6 +816,19 @@ object ParseTree {
       case `then` => {
         nIndex = nIndex + 1
         tree = addNodeInParseTree(tree, then, nIndex)
+        tree = relNodeInParseTree(tree, nIndex, parentIndex)
+        inputStringStack.pop()
+        inputStringRawStack.pop()
+      }
+      case default => throw SyntaxError("Parse Error !!!")  
+    }
+  }
+  
+  def functionterminal(parentIndex: Int) = {
+    inputStringStack.head match {
+      case `function` => {
+        nIndex = nIndex + 1
+        tree = addNodeInParseTree(tree, function, nIndex)
         tree = relNodeInParseTree(tree, nIndex, parentIndex)
         inputStringStack.pop()
         inputStringRawStack.pop()

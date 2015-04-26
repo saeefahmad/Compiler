@@ -17,7 +17,7 @@ object Parser {
     terminal = RegExMatch.regExMatcher(inputSourceCode(pointer))
     var sourceLength: Int = inputSourceCode.length
     
-    while (sourceLength > 0) {     
+    while (sourceLength > 0) { 
       if (tokenStack.head == "$" && terminal == "$" 
           && tokenStack.length == 1) {        
         Console.println("Program successfully compiled !!!")

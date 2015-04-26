@@ -21,6 +21,7 @@ object NonTerminal {
   val term = "<term>"  
   val termPrime = "<termPrime>"
   val factor = "<factor>"
+  val procedure = "<procedure>"
     
   def deriveNonTerminal (str: String, inputStr: String): Array[String] = str match {    
     case `program` => ParsingTable.program(inputStr)
@@ -41,6 +42,7 @@ object NonTerminal {
     case `term` => ParsingTable.term(inputStr)
     case `termPrime` => ParsingTable.termPrime(inputStr)
     case `factor` => ParsingTable.factor(inputStr)
+    case `procedure` => ParsingTable.procedure(inputStr)
     case default => throw SyntaxError("Parse Error !!!")  
   } 
   

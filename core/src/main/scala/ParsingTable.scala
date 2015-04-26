@@ -1,7 +1,6 @@
 package edu.utsa.cs5363
 
 import scala.io.Source
-import RegExMatch._
 
 sealed abstract class Token
 
@@ -34,9 +33,11 @@ object ParsingTable {
   def identType (input: String): Array[String] = {
     var productInt = Array("INT")
     var productBool = Array("BOOL")
+    var productProcedure = Array("PROCEDURE")
     input match {
       case "INT" => return productInt
       case "BOOL" => return productBool
+      case "PROCEDURE" => return productProcedure
       case default => throw SyntaxError("Parse Error !!!")  
     }
   } 
@@ -52,6 +53,7 @@ object ParsingTable {
       case "ELSE" => return productEp
       case "WHILE" => return product
       case "WRITEINT" => return product
+      case "function" => return product 
       case default => throw SyntaxError("Parse Error !!!")  
     }
   } 
@@ -62,11 +64,13 @@ object ParsingTable {
     var productIfSt = Array("<ifStatement>")
     var productWhileSt = Array("<whileStatement>")
     var productWriteInt = Array("<writeInt>")
+    var productProcedure = Array("<procedure>")
     input match {
       case "ident" => return productAsgn
       case "IF" => return productIfSt
       case "WHILE" => return productWhileSt
       case "WRITEINT" => return productWriteInt
+      case "function" => return productProcedure  
       case default => throw SyntaxError("Parse Error !!!")  
     }
   } 
@@ -224,6 +228,16 @@ object ParsingTable {
       case "LP" => return productExpr
       case "ident" => return productIdent
       case "boollit" => return productBoolit
+      case default => throw SyntaxError("Parse Error !!!")  
+    }
+  }
+  
+  // Production 19
+  def procedure (input: String): Array[String] = {
+    var productProc = Array("function", "ident", "LP", "<expression>", "RP", "<statementSequence>", "END") 
+    var productEp = null
+    input match {
+      case "function" => return productProc
       case default => throw SyntaxError("Parse Error !!!")  
     }
   }
