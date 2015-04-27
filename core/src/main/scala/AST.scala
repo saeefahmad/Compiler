@@ -27,6 +27,7 @@ object AST {
   val sc = "SC"
   val int = "INT"  
   val bool = "BOOL"
+  val procedure = "PROCEDURE"
   val asgn = "ASGN"
   val readint = "READINT"
   val ifterm = "IF"
@@ -39,6 +40,7 @@ object AST {
   val add = "ADDITIVE"
   val boollit = "boollit"
   val then = "THEN"  
+  val function = "function"
   
   
   def ASTInit (inputStack: Stack[String], fileName: String, inputStackRaw: Stack[String]): Unit = {
@@ -196,6 +198,11 @@ object AST {
         boolterminal()
         return node
       }
+      case `procedure` => {
+        declaredVariableType += inputStringStack.head
+        procedureterminal()
+        return node
+      }
       case default => throw SyntaxError("Syntax Error !!!")  
     }
   } 
@@ -310,6 +317,32 @@ object AST {
           return node
         }
       }
+      case `function` => { // here we go
+        var stNode = new ASTNodes()
+        stNode.addParent(node)
+        var stmt = statement(stNode) 
+        if(stmt != null) {
+          node.addChild(stmt)
+          if (stmt.getType() == "BOOL") {
+            node.setTypeOk(true)
+          } else {
+            node.setTypeOk(false)
+          }  
+        }        
+        scterminal()
+        var stmtsq = statementSequence(node)   
+        if(stmtsq != null) {
+          if (stmt.getType() == "BOOL" && stmtsq.getTypeOk() == true) {
+            node.setTypeOk(true)
+          } else {
+            node.setTypeOk(false)
+            node.setType("Error")
+          }
+          return stmtsq
+        } else {
+          return node
+        }           
+      }
       case default => throw SyntaxError("Syntax Error !!!")  
     }
   } 
@@ -328,6 +361,9 @@ object AST {
       }
       case `writeint` => { 
         return writeInt(astNode)
+      } 
+      case `function` => { 
+        return procedure(astNode)
       } 
       case default => throw SyntaxError("Syntax Error !!!")  
     }
@@ -918,6 +954,53 @@ object AST {
     }
   }
   
+  // Production 19
+  def procedure (astNode: ASTNodes): ASTNodes = {  
+    var node = astNode
+    inputStringStack.head match {
+      case `function` => {
+        node.ASTNodes(inputStringStack.head)           
+        nIndex = nIndex + 1
+        node.addIndex(nIndex)
+        functionterminal() 
+        identterminal()
+        lpterminal()
+        var exp = new ASTNodes()
+        exp.addParent(node)
+        var expr = expression(exp)
+        node.addChild(expr)
+        if(expr.getType() == "BOOL" || expr.getType() == "INT" || expr.getType() == "PROCEDURE") {
+          node.setType("BOOL")
+        } else {
+          node.setType("ERROR")
+        }
+        
+        rpterminal()
+        var stmtlist = new ASTNodes()
+        stmtlist.ASTNodes("stmt list")
+        stmtlist.addParent(node)
+        nIndex = nIndex + 1
+        stmtlist.addIndex(nIndex)          
+        
+        if(inputStringStack.head != "END") {
+          var stmtChild = statementSequence(stmtlist)
+          stmtChild.addParent(node) 
+          if(stmtChild != null) {
+            node.addChild(stmtChild)
+            if(stmtChild.getTypeOk() == true && (expr.getType() == "BOOL" || expr.getType() == "INT" )) {
+              node.setType("BOOL")
+            } else {
+              node.setType("ERROR")
+            }
+          } 
+        }      
+        endterminal()
+        return node
+      }
+      case default => throw SyntaxError("Syntax Error !!!")  
+    }
+  }
+  
   // terminals    
   def programterminal () {
     inputStringStack.head match {
@@ -1001,6 +1084,16 @@ object AST {
     }
   } 
   
+  def functionterminal () = {
+    inputStringStack.head match {
+      case `function` => {          
+        inputStringStack.pop()
+        inputStringRawStack.pop()
+      }
+      case default => throw SyntaxError("Syntax Error !!!")  
+    }
+  } 
+  
   def asterminal() = {
     inputStringStack.head match {
       case `as` => {
@@ -1030,6 +1123,16 @@ object AST {
       case default => throw SyntaxError("Syntax Error !!!")  
     }
   }  
+  
+  def procedureterminal() = {
+    inputStringStack.head match {
+      case `procedure` => {
+        inputStringStack.pop()
+        inputStringRawStack.pop()
+      }
+      case default => throw SyntaxError("Syntax Error !!!")  
+    }
+  }
   
   def boolterminal() = {
     inputStringStack.head match {
