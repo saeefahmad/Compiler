@@ -44,6 +44,8 @@ object BuildAddressCode {
     
     astNodeStack.push(asTree)
     var nestCbr: Stack[AddressCodeBlocks] = new Stack[AddressCodeBlocks] 
+    var nestPrc: Stack[String] = new Stack[String] 
+    var nestPrcIdx: Stack[Int] = new Stack[Int]
     val loop = new Breaks
     loop.breakable {
     while (!astNodeStack.isEmpty) {
@@ -106,7 +108,43 @@ object BuildAddressCode {
         if(astNodeStack.head.getIdentifier() == "decl list") {
           NumOfDeclaredVar = astNodeStack.head.getChildren().length
           block.setNumOfDeclVar(NumOfDeclaredVar)
-        }
+        } 
+        
+        if(astNodeStack.head.getIdentifier() == "function") {
+          if(!nestPrc.contains(astNodeStack.head.getChildren().head.getIdentifier())){
+            nestPrc.push(astNodeStack.head.getChildren().head.getIdentifier())
+            
+            nIndex = nIndex + 1
+            var instr: Array[String] = Array("jumpI", "B"+nIndex)
+            block.addInstruction(instr)
+            block.setJump(nIndex)
+            tree = ILOCInstructionList.ILOCJumpTmpl(block, tree, nIndex)
+            
+            blockNodes += block
+            treeBlock.append(ILOCInstructionList.nodeTemplate(block, tree))
+            treeBlock = relNodeInCFG(treeBlock, block, nIndex)
+            
+            tree = new StringBuffer
+            block = new AddressCodeBlocks() 
+            block.AddressCodeBlocks("B"+nIndex).setIndex(nIndex) /// create block here
+            tree = ILOCInstructionList.ILOCBlockTmpl(block, tree)
+            nestPrcIdx.push(nIndex)
+          } else {
+            nestPrc.push(astNodeStack.head.getChildren().head.getIdentifier())
+            var idx = nestPrc.indexOf(astNodeStack.head.getChildren().head.getIdentifier())
+            var instr: Array[String] = Array("jumpI", "B"+nestPrcIdx.apply(idx))
+            block.addInstruction(instr)
+            block.setJump(nIndex)
+            tree = ILOCInstructionList.ILOCJumpTmpl(block, tree, nestPrcIdx.apply(idx))
+            
+            blockNodes += block
+            treeBlock.append(ILOCInstructionList.nodeTemplate(block, tree))
+            treeBlock = relNodeInCFG(treeBlock, block, nIndex)
+            
+            nestPrcIdx.push(nestPrcIdx.apply(idx))
+          }         
+        
+        }        
         astNodeStack.push(astNodeStack.head.getVisitedChild())
       } else {
         if(astNodeStack.head.getIdentifier() == "program") {     
@@ -310,6 +348,9 @@ object BuildAddressCode {
             && astNodeStack.head.getParent().getParent().getIdentifier() != "decl list") {   
           astNodeStack.head.setIsIdent(true)
           tree = ILOCInstructionList.ILOCIdentTmpl(astNodeStack.head, tree)
+        } else if(astNodeStack.head.getIdentifier() == "function") {   
+          nestPrc.pop()
+          nestPrcIdx.pop()
         } else {
           // do nothing
         }            

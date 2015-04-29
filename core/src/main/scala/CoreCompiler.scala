@@ -39,7 +39,7 @@ object CoreCompiler {
         Parser.parse(inputSource)
         Parser.makeParseTree(inputSource, parseTreeName) 
         var ast = AST.makeAST(inputSource, astName)
-//        var blocks = BuildAddressCode.makeCFG(ast, ilocCFGName)
+        var blocks = BuildAddressCode.makeCFG(ast, ilocCFGName)
 //        BuildMipsCode.makeMIPS(blocks, mipsAsmName)
 
       } catch {

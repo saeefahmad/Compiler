@@ -14,7 +14,6 @@ object AST {
   var declaredVariables: ArrayBuffer[String] = ArrayBuffer[String]()
   var declaredVariableType: ArrayBuffer[String] = ArrayBuffer[String]()
   
-  
   val prog = "PROGRAM"
   val num = "num" 
   val lp = "LP"
@@ -62,7 +61,7 @@ object AST {
     var ast: ASTNodes = asTree
     astNodeStack.push(ast)
     while (!astNodeStack.isEmpty) {
-      if (!astNodeStack.head.getVisit()) {        
+      if (!astNodeStack.head.getVisit()) {  
         treeBuild = addNodeInAST(treeBuild, astNodeStack.head)
         if(astNodeStack.head.getIndex() > 1) {
           treeBuild = relNodeInAST(treeBuild, astNodeStack.head)
@@ -963,6 +962,12 @@ object AST {
         nIndex = nIndex + 1
         node.addIndex(nIndex)
         functionterminal() 
+        var idnt = new ASTNodes()
+        idnt.ASTNodes(inputStringRawStack.head)
+        idnt.addParent(node)
+        nIndex = nIndex + 1
+        idnt.addIndex(nIndex) 
+        node.addChild(idnt) 
         identterminal()
         lpterminal()
         var exp = new ASTNodes()
