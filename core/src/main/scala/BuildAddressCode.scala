@@ -88,9 +88,9 @@ object BuildAddressCode {
             block = new AddressCodeBlocks() 
             block.AddressCodeBlocks("B"+bidx).setIndex(bidx.asInstanceOf[Int]) /// create block here
             tree = ILOCInstructionList.ILOCBlockTmpl(block, tree)  
-          }          
-        }
-        if(astNodeStack.head.getIdentifier() == "if") {
+          }
+          astNodeStack.push(astNodeStack.head.getVisitedChild())
+        } else if(astNodeStack.head.getIdentifier() == "if") {
           if(block.getCbr1() != null) {
             blockNodes += block
             var bidx = block.getCbr1()
@@ -104,21 +104,21 @@ object BuildAddressCode {
             block.AddressCodeBlocks("B"+bidx).setIndex(bidx.asInstanceOf[Int]) /// create block here
             tree = ILOCInstructionList.ILOCBlockTmpl(block, tree)  
           }
-        }
-        if(astNodeStack.head.getIdentifier() == "decl list") {
+          astNodeStack.push(astNodeStack.head.getVisitedChild())
+        } else if(astNodeStack.head.getIdentifier() == "decl list") {
           NumOfDeclaredVar = astNodeStack.head.getChildren().length
           block.setNumOfDeclVar(NumOfDeclaredVar)
-        } 
-        
-        if(astNodeStack.head.getIdentifier() == "function") {
+          
+          astNodeStack.push(astNodeStack.head.getVisitedChild())
+        } else if(astNodeStack.head.getIdentifier() == "function") {
           if(!nestPrc.contains(astNodeStack.head.getChildren().head.getIdentifier())){
             nestPrc.push(astNodeStack.head.getChildren().head.getIdentifier())
             
             nIndex = nIndex + 1
-            var instr: Array[String] = Array("jumpI", "B"+nIndex)
+            var instr: Array[String] = Array("jumpI", "Recursive-Procedure")
             block.addInstruction(instr)
             block.setJump(nIndex)
-            tree = ILOCInstructionList.ILOCJumpTmpl(block, tree, nIndex)
+            tree = ILOCInstructionList.ILOCJumpPrcTmpl(block, tree, "Recursive-Procedure")
             
             blockNodes += block
             treeBlock.append(ILOCInstructionList.nodeTemplate(block, tree))
@@ -126,26 +126,19 @@ object BuildAddressCode {
             
             tree = new StringBuffer
             block = new AddressCodeBlocks() 
-            block.AddressCodeBlocks("B"+nIndex).setIndex(nIndex) /// create block here
-            tree = ILOCInstructionList.ILOCBlockTmpl(block, tree)
-            nestPrcIdx.push(nIndex)
+            block.AddressCodeBlocks("Recursive-Procedure").setIndex(nIndex) 
+            tree = ILOCInstructionList.ILOCBlockPrcTmpl(block, tree, "Recursive-Procedure")
+            
+            astNodeStack.head.setVisit(false)
+            astNodeStack.pop()
+            
           } else {
-            nestPrc.push(astNodeStack.head.getChildren().head.getIdentifier())
-            var idx = nestPrc.indexOf(astNodeStack.head.getChildren().head.getIdentifier())
-            var instr: Array[String] = Array("jumpI", "B"+nestPrcIdx.apply(idx))
-            block.addInstruction(instr)
-            block.setJump(nIndex)
-            tree = ILOCInstructionList.ILOCJumpTmpl(block, tree, nestPrcIdx.apply(idx))
-            
-            blockNodes += block
-            treeBlock.append(ILOCInstructionList.nodeTemplate(block, tree))
-            treeBlock = relNodeInCFG(treeBlock, block, nIndex)
-            
-            nestPrcIdx.push(nestPrcIdx.apply(idx))
           }         
         
-        }        
-        astNodeStack.push(astNodeStack.head.getVisitedChild())
+        } else {
+          astNodeStack.push(astNodeStack.head.getVisitedChild())
+        }
+        
       } else {
         if(astNodeStack.head.getIdentifier() == "program") {     
           exitIndex = block.getIndex()
@@ -349,8 +342,6 @@ object BuildAddressCode {
           astNodeStack.head.setIsIdent(true)
           tree = ILOCInstructionList.ILOCIdentTmpl(astNodeStack.head, tree)
         } else if(astNodeStack.head.getIdentifier() == "function") {   
-          nestPrc.pop()
-          nestPrcIdx.pop()
         } else {
           // do nothing
         }            

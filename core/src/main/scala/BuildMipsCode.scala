@@ -7,9 +7,7 @@ import scala.util.control._
 import BuildAddressCode._
 
 object BuildMipsCode {
-//  var blockNodes: ListBuffer[AddressCodeBlocks] = new ListBuffer()
   var NumOfDeclaredVar: Int = 0
-//  var blockContent: StringBuffer = new StringBuffer()
   var declVarCounter: Int = 0
   var declVar: ArrayBuffer[String] = new ArrayBuffer()
   

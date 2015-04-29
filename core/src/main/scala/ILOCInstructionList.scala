@@ -31,6 +31,13 @@ object ILOCInstructionList {
     return treeBuffer
   }
   
+  def ILOCBlockPrcTmpl (block: AddressCodeBlocks, treeBuffer: StringBuffer, idx: String): StringBuffer = {
+    treeBuffer.append("<tr><td border=\"1\" colspan=\"3\">")
+    treeBuffer.append(idx)
+    treeBuffer.append("</td></tr>")
+    return treeBuffer
+  }
+  
   def ILOCDeclarationTmpl (astNode: ASTNodes, treeBuffer: StringBuffer): StringBuffer = {
     treeBuffer.append(tr+td+"loadI"+tdPr+td+"0"+tdPr+td+"=&gt; r_"
         +astNode.getIdentifier().split(": ")(1)+tdPr+trPr)
@@ -105,6 +112,11 @@ object ILOCInstructionList {
   
   def ILOCJumpTmpl (block: AddressCodeBlocks, treeBuffer: StringBuffer, idx: Any): StringBuffer = {
     treeBuffer.append(tr+td+"jumpI"+tdPr+td+tdPr+td+"=&gt; B"+idx+tdPr+trPr)
+    return treeBuffer
+  }
+  
+  def ILOCJumpPrcTmpl (block: AddressCodeBlocks, treeBuffer: StringBuffer, idx: String): StringBuffer = {
+    treeBuffer.append(tr+td+"jumpI"+tdPr+td+tdPr+td+"=&gt; "+idx+tdPr+trPr)
     return treeBuffer
   }
 }
